@@ -95,7 +95,7 @@ location = /security.txt {
 ```
 
 ### Add to server section of each domain conf file:
-* Add this at the end of the section
+* Add this at the end of each server section
 ---
 
 ```
