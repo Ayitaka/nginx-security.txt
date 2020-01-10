@@ -11,6 +11,7 @@ Features:
 Based on configuration examples generated from [https://securitytxt.org/](https://securitytxt.org/)
 
 ## ***Requirements***
+(Already installed for most packages)
 * Module ngx_http_map_module
 * Module ngx_http_rewrite_module
 
@@ -34,7 +35,7 @@ Based on configuration examples generated from [https://securitytxt.org/](https:
   }
 ```
 
-### Create /etc/nginx/security.txt.conf:
+### Create /etc/nginx/snippets/security.txt.conf:
 * Change option settings and/or comment out options that are not applicable to your domains
 * Cuztomize one per domain or use one for all domains
 ---
@@ -99,5 +100,5 @@ location = /security.txt {
 ---
 
 ```
-    include /etc/nginx/security.txt.conf;
+    include /etc/nginx/snippets/security.txt.conf;
 ```
