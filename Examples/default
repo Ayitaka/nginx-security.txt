@@ -93,13 +93,3 @@ server {
 #
 #       include /etc/nginx/snippets/security.txt.conf;
 #}
-
-
-server {
-  listen 443 ssl http2;
-  server_name example.com *.example.com;
-
-  ...
-  
-  include /etc/nginx/snippets/security.txt.conf;
-}
