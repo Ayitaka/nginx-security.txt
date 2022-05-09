@@ -6,6 +6,7 @@ Features:
 
 * Configure which security.txt options to include, comment out the ones not applicable for your website
 * Automatically set all domains for security.txt options to requested hostname, requested base hostname, sub-domain of requested base hostname, or custom hostname
+* Automatically set the required ISO8601 expiration date on page load
 * Not compliant with standard, but you can set email addresses in Contact: option to anti-spam format (i.e. security[at]example[dot]com
 
 Based on configuration examples generated from [https://securitytxt.org/](https://securitytxt.org/)
@@ -14,14 +15,18 @@ Based on configuration examples generated from [https://securitytxt.org/](https:
 (Already installed for most packages)
 * Module ngx_http_map_module
 * Module ngx_http_rewrite_module
+* Module ngx_http_js_module
 
 ## ***How To Use***
 
 ### Add to http section of nginx.conf:
-* Add this before `include /etc/nginx/conf.d/*.conf;`
 ---
 
 ```
+  # Importing automatic expiration date setter
+  js_import njs/securitytxt.js;
+  js_set $securityexpires securitytxt.setexpires;
+
   # Mapping base hostname for security.txt, matches example.com or subdomain.example.com
   map $host      $basehost {
       default                    "";
@@ -82,7 +87,7 @@ set $policy             "Policy: https://${basehost}/policy\n";
 #         Can have more than one (i.e. "Hiring: https://www.${basehost}/jobs\nHiring: https://jobs.${basehost}/\n")
 set $hiring             "Hiring: https://${basehost}/jobs\n";
 
-set $securitytxt "${contact}${encryption}${acknowledgements}${preferredlanguages}${canonical}${policy}${hiring}";
+set $securitytxt "${contact}${securityexpires}${encryption}${acknowledgements}${preferredlanguages}${canonical}${policy}${hiring}";
 
 location /.well-known/security.txt {
    add_header Content-Type text/plain;
@@ -93,6 +98,33 @@ location = /security.txt {
    add_header Content-Type text/plain;
    return 200 $securitytxt;
 }
+```
+
+### Create /etc/nginx/njs/securitytxt.js
+```JS
+function pad(number) {
+        var r = String(number);
+        if (r.length === 1) {
+        r = '0' + r;
+      }
+      return r;
+    }
+
+Date.prototype.toISOString = function() {
+        return (this.getUTCFullYear() + 1) +
+        '-' + pad(this.getUTCMonth() + 1) +
+        '-' + pad(this.getUTCDate()) +
+        'T' + pad(this.getUTCHours()) +
+        ':' + pad(this.getUTCMinutes()) +
+        ':' + pad(this.getUTCSeconds()) +
+        '.' + String((this.getUTCMilliseconds() / 1000).toFixed(3)).slice(2, 5) +
+        'Z';
+}
+function setexpires(r) {
+var date = new Date();
+return ("Expires: " + date.toISOString() + "\n");
+}
+export default {setexpires};
 ```
 
 ### Add to server section of each domain conf file:
